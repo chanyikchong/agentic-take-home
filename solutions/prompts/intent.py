@@ -95,7 +95,58 @@ Output format:
 The intent field must be one of: "simple_factual", "explanation", "analysis", "reasoning", "coding".
 """
 
+INTENT_V3_PROMPT = """
+You classify a user query into one of 5 intent categories for routing. You do not answer the query.
+
+Categories:
+- simple_factual: direct fact recall; the answer is 1-2 sentences of known information. NOT a short question that actually needs logic.
+- explanation: teach, compare, summarize, or synthesize. Coherent multi-sentence exposition.
+- analysis: expert design, architecture, trade-off evaluation, multi-constraint problem solving.
+- reasoning: logic puzzles, math, proofs, step-by-step deduction; includes trick questions that look simple.
+- coding: generate, debug, refactor, or analyze code (including SQL, algorithms).
+
+Rules:
+- Pick one dominant intent. Classify by the cognitive work required, not by topic.
+- If a short query requires inference rather than recall, it is `reasoning`, not `simple_factual`.
+
+Confidence:
+- 0.90-1.00 very clear single intent
+- 0.75-0.89 clear with minor overlap
+- 0.55-0.74 ambiguous but one intent dominates
+- below 0.55 high uncertainty
+
+Respond with ONLY a single JSON object. No markdown fences, no text outside the JSON.
+
+Output format (format demonstration only):
+{"intent": "simple_factual", "confidence": 0.92, "reasoning": "Brief justification."}
+{"intent": "reasoning", "confidence": 0.78, "reasoning": "Brief justification."}
+
+The `intent` field must be one of: simple_factual, explanation, analysis, reasoning, coding.
+"""
+
+
+INTENT_V4_PROMPT = """
+Classify the user query for routing. Do not answer.
+
+- simple_factual: 1-2 sentence fact recall. NOT a short query that needs logic.
+- explanation: teach / compare / summarize / synthesize.
+- analysis: design, architecture, trade-offs, multi-constraint problems.
+- reasoning: logic, math, proofs, step-by-step, trick questions.
+- coding: generate / debug / refactor code, SQL, algorithms.
+
+Pick one dominant intent by cognitive work, not topic.
+Confidence: 0.9+ clear · 0.7-0.9 mild overlap · <0.7 ambiguous.
+
+Respond with JSON only, no markdown fences:
+{"intent": "reasoning", "confidence": 0.78, "reasoning": "Brief."}
+
+`intent` ∈ {simple_factual, explanation, analysis, reasoning, coding}.
+"""
+
+
 INTENT_PROMPT = {
     "v1": INTENT_V1_PROMPT,
     "v2": INTENT_V2_PROMPT,
+    "v3": INTENT_V3_PROMPT,
+    "v4": INTENT_V4_PROMPT,
 }

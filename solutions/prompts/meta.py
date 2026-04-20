@@ -144,7 +144,61 @@ Output format:
 {{"intent_model": "<model_key>", "mission_model": "<model_key>", "latency_model": "<model_key>", "decision_model": "<model_key>", "reasoning": "Brief justification."}}
 """
 
+META_PROMPT_V3 = """
+You choose which LLM runs each stage of the routing pipeline for a user query. You do not answer the query. You do not pick the final serving model.
+
+Pipeline roles:
+- intent: classify query type (simple_factual / explanation / analysis / reasoning / coding).
+- mission: score correctness-criticality.
+- latency: score time-sensitivity.
+- decision: pick the final (model, deployment).
+
+Available routing models:
+{available_models}
+
+Policy — cheapest set that still routes reliably:
+- Simple, unambiguous query → cheapest model for all 4 roles.
+- Ambiguous, technical, multi-part, or deceptively-simple → upgrade `intent` and `decision`.
+- `mission` and `latency` rarely need a strong model.
+- Upgrade `intent` first when classification may be unreliable; upgrade `decision` when the routing trade-off is non-trivial.
+
+Rules:
+- Assign exactly one model per role from the list above.
+- Do not reason about edge vs cloud here.
+- Think about routing difficulty, not answer difficulty.
+
+Respond with ONLY a single JSON object. No markdown fences.
+
+Output format (format demonstration only):
+{{"intent_model": "<model_key>", "mission_model": "<model_key>", "latency_model": "<model_key>", "decision_model": "<model_key>", "reasoning": "Brief justification."}}
+"""
+
+
+META_PROMPT_V4 = """
+Pick the LLM for each routing stage. Do not answer the query. Do not pick the final serving model.
+
+Roles:
+- intent: classify query type (5 categories)
+- mission: score correctness-criticality
+- latency: score time-sensitivity
+- decision: pick the final (model, deployment)
+
+Available routing models:
+{available_models}
+
+Cheapest set that routes reliably:
+- Simple/unambiguous → cheapest for all 4.
+- Ambiguous / technical / deceptively-simple → upgrade intent and decision.
+- mission and latency rarely need a strong model.
+
+Respond with JSON only, no markdown fences:
+{{"intent_model": "<key>", "mission_model": "<key>", "latency_model": "<key>", "decision_model": "<key>", "reasoning": "Brief."}}
+"""
+
+
 META_PROMPT = {
     "v1": META_PROMPT_V1,
     "v2": META_PROMPT_V2,
+    "v3": META_PROMPT_V3,
+    "v4": META_PROMPT_V4,
 }

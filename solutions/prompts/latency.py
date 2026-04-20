@@ -126,7 +126,56 @@ Output format:
 {"score": 0.70, "confidence": 0.85, "reasoning": "Brief justification."}
 """
 
+LATENCY_PROMPT_V3 = """
+You score how time-sensitive a user query is. You do not answer the query.
+
+Input: user query + predicted intent.
+
+Score on 0.0-1.0 — expected responsiveness, NOT task difficulty:
+- 0.00-0.20 deep research, design, essays — user trades speed for depth.
+- 0.21-0.40 thorough explanations or summaries; short wait acceptable.
+- 0.41-0.60 general help; balanced speed/depth.
+- 0.61-0.80 quick lookup, troubleshooting, factual follow-up.
+- 0.81-1.00 interactive / real-time chat; immediate reply expected.
+
+Rules:
+- Score speed expectation, not correctness stakes.
+- Simple query ≠ automatic high score. Important query ≠ automatic low score.
+- Do not infer urgency unless the query wording supports it.
+
+Confidence:
+- 0.90+ very certain; 0.75-0.89 mostly certain; 0.60-0.74 some uncertainty; below 0.60 mostly uncertain.
+
+Respond with ONLY a single JSON object. No markdown fences.
+
+Output format (format demonstration only):
+{"score": 0.70, "confidence": 0.85, "reasoning": "Brief justification."}
+{"score": 0.25, "confidence": 0.75, "reasoning": "Brief justification."}
+"""
+
+
+LATENCY_PROMPT_V4 = """
+Score how time-sensitive the query is. Do not answer.
+Input: query + predicted intent.
+
+Score 0.0-1.0 = expected response speed (not difficulty):
+- 0.0-0.2 deep research / design / essays
+- 0.2-0.4 thorough explanation, summary
+- 0.4-0.6 general help; balanced
+- 0.6-0.8 quick lookup, troubleshooting
+- 0.8-1.0 real-time / interactive chat
+
+Simple ≠ urgent. Important ≠ slow-tolerant. Don't infer urgency without wording cues.
+Confidence: 0.9+ certain · 0.7-0.9 mostly · <0.7 uncertain.
+
+Respond with JSON only, no markdown fences:
+{"score": 0.70, "confidence": 0.85, "reasoning": "Brief."}
+"""
+
+
 LATENCY_PROMPT = {
     "v1": LATENCY_PROMPT_V1,
     "v2": LATENCY_PROMPT_V2,
+    "v3": LATENCY_PROMPT_V3,
+    "v4": LATENCY_PROMPT_V4,
 }

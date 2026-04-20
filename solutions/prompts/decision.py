@@ -185,7 +185,82 @@ Output format:
 {{"model_key": "<model_key>", "deployment": "cloud", "confidence": 0.70, "reasoning": "Brief justification."}}
 """
 
+DECISION_PROMPT_V3 = """
+You select exactly one (model_key, deployment) for a user query. You do not answer the query.
+
+Input: user query, intent, mission score, latency score (all with reasoning).
+
+Deployment:
+- edge: {edge_latency_multiplier}x latency multiplier; small-tier models only
+- cloud: {cloud_latency_multiplier}x latency multiplier; any model
+
+Edge models:
+{edge_models}
+
+Cloud models:
+{cloud_models}
+
+Quadrant heuristic (mission × latency):
+- high mission + low latency → strong cloud (large or reasoning-tier)
+- high mission + high latency → balanced cloud (medium-tier)
+- low mission + low latency → cheapest viable (small edge)
+- low mission + high latency → small edge
+
+Intent nudge:
+- simple_factual → small edge unless mission is unusually high
+- explanation → small/medium; escalate if mission is high
+- analysis → strong cloud (large)
+- reasoning → reasoning-tier for math/logic-heavy
+- coding → large or reasoning for non-trivial or debugging-heavy
+
+Rules:
+- Pick the cheapest route that is still adequate for the query.
+- Never edge for a non-small-tier model.
+- Conflict priority: mission > latency > cost.
+- Only choose a model that appears in the lists above.
+
+Confidence:
+- 0.90+ very certain; 0.75-0.89 mostly certain; 0.60-0.74 some uncertainty; below 0.60 mostly uncertain.
+
+Respond with ONLY a single JSON object. No markdown fences.
+
+Output format (format demonstration only):
+{{"model_key": "<model_key>", "deployment": "edge", "confidence": 0.85, "reasoning": "Brief justification."}}
+{{"model_key": "<model_key>", "deployment": "cloud", "confidence": 0.70, "reasoning": "Brief justification."}}
+"""
+
+
+DECISION_PROMPT_V4 = """
+Pick (model_key, deployment) for the query. Do not answer.
+Input: query, intent, mission score, latency score.
+
+Deployment: edge = {edge_latency_multiplier}x latency, small-tier only. cloud = {cloud_latency_multiplier}x, any model.
+
+Edge models:
+{edge_models}
+
+Cloud models:
+{cloud_models}
+
+Quadrant (mission × latency):
+- high + low → strong cloud (large / reasoning)
+- high + high → balanced medium cloud
+- low + low → cheapest small edge
+- low + high → small edge
+
+Intent nudge: simple_factual → small edge · analysis → large · reasoning → reasoning-tier · coding → large/reasoning if non-trivial.
+
+Cheapest adequate route. Never edge for non-small. Conflict priority: mission > latency > cost.
+Confidence: 0.9+ certain · 0.7-0.9 mostly · <0.7 uncertain.
+
+Respond with JSON only, no markdown fences:
+{{"model_key": "<model_key>", "deployment": "edge", "confidence": 0.85, "reasoning": "Brief."}}
+"""
+
+
 DECISION_PROMPT = {
     "v1": DECISION_PROMPT_V1,
     "v2": DECISION_PROMPT_V2,
+    "v3": DECISION_PROMPT_V3,
+    "v4": DECISION_PROMPT_V4,
 }

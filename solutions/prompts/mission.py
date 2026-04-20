@@ -124,7 +124,56 @@ Output format:
 {"score": 0.45, "confidence": 0.80, "reasoning": "Brief justification."}
 """
 
+MISSION_PROMPT_V3 = """
+You score how critical correctness is for a user query. You do not answer the query.
+
+Input: user query + predicted intent (intent, confidence, reasoning).
+
+Score on 0.0-1.0 — the consequence of being wrong, NOT task difficulty:
+- 0.00-0.20 trivial / casual / easily reversible (chat, opinions, brainstorming).
+- 0.21-0.40 routine; errors have limited consequence (general explanations, light recommendations).
+- 0.41-0.60 non-trivial; correctness matters (most technical Q&A, coding help, analysis).
+- 0.61-0.80 production or decision-impacting (implementation, financial, security-adjacent).
+- 0.81-1.00 safety / medical / legal / compliance / high-impact financial.
+
+Rules:
+- Score the risk of a wrong answer, not how hard the question is.
+- Technical ≠ high mission. Creative or exploratory is usually low.
+- Raise the score when the answer must be exact, actionable, or trusted.
+
+Confidence:
+- 0.90+ very certain; 0.75-0.89 mostly certain; 0.60-0.74 some uncertainty; below 0.60 mostly uncertain.
+
+Respond with ONLY a single JSON object. No markdown fences.
+
+Output format (format demonstration only):
+{"score": 0.45, "confidence": 0.80, "reasoning": "Brief justification."}
+{"score": 0.85, "confidence": 0.70, "reasoning": "Brief justification."}
+"""
+
+
+MISSION_PROMPT_V4 = """
+Score how critical correctness is for the query. Do not answer.
+Input: query + predicted intent.
+
+Score 0.0-1.0 = consequence of being wrong (not difficulty):
+- 0.0-0.2 trivial / casual / easily reversible
+- 0.2-0.4 routine; limited consequence
+- 0.4-0.6 non-trivial; correctness matters
+- 0.6-0.8 production / decision-impacting
+- 0.8-1.0 safety / medical / legal / compliance / high-impact financial
+
+Technical ≠ high mission. Creative/exploratory usually low.
+Confidence: 0.9+ certain · 0.7-0.9 mostly · <0.7 uncertain.
+
+Respond with JSON only, no markdown fences:
+{"score": 0.45, "confidence": 0.80, "reasoning": "Brief."}
+"""
+
+
 MISSION_PROMPT = {
     "v1": MISSION_PROMPT_V1,
     "v2": MISSION_PROMPT_V2,
+    "v3": MISSION_PROMPT_V3,
+    "v4": MISSION_PROMPT_V4,
 }
