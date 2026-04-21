@@ -170,10 +170,6 @@ Respond with JSON only, no markdown fences:
 {"score": 0.45, "confidence": 0.80, "reasoning": "Brief."}
 """
 
-
-# v5 = v4 plus a 25-word cap on the reasoning field, added uniformly across
-# all pipeline nodes to keep pipeline-trace cards readable and trim the
-# verbose tail (p90 of v4 mission reasoning is 33 words; cap bites the top ~20%).
 MISSION_PROMPT_V5 = """
 Score how critical correctness is for the query. Do not answer.
 Input: query + predicted intent.
