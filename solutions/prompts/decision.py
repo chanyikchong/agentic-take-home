@@ -258,9 +258,56 @@ Respond with JSON only, no markdown fences:
 """
 
 
+DECISION_PROMPT_V5 = """
+Pick (model_key, deployment) for the query. Do not answer.
+Input: query, intent, mission score, latency score.
+
+Deployment: edge = {edge_latency_multiplier}x latency, small-tier only. cloud = {cloud_latency_multiplier}x, any model.
+
+Edge models:
+{edge_models}
+
+Cloud models:
+{cloud_models}
+
+Capability: many catalog entries carry a parameter count in their display name (e.g. key `llama-3.3-70b` has display "Llama 3.3 70B"); Gemma 3N E4B's (`gemma-3n-e4b`) "E4B" is ~4B *activated* params per forward pass out of a larger total, so it runs at 4B-class cost and speed while a newer architecture gives it stronger quality than `gemma-3-4b` on all tasks. Within a family more params → higher quality, cost, latency; across families, architecture matters more than raw size. Tiers (SMALL/MEDIUM/LARGE) overlap — not a strict order. REASONING specialists excel at math, logic, and multi-step coding/planning. Escalate only when the query justifies it.
+
+The `model_key` you emit MUST be the exact lowercase catalog key from the lists above, not the display name and not an abbreviated form like `gemma-3b`.
+
+Score meanings (both on 0.0-1.0):
+- mission_score = consequence of being wrong.
+  ≤ 0.35 trivial / casual / reversible · 0.36-0.60 moderate; correctness matters · ≥ 0.61 production, decision-impacting, or safety/legal/medical.
+- latency_score = how much the user wants a fast response.
+  ≤ 0.35 willing to wait for a thorough answer · 0.36-0.60 balanced · ≥ 0.61 wants a quick reply, values speed over depth.
+Treat ≥ 0.60 as "high" and < 0.60 as "low" when applying the quadrant below.
+
+Quadrant (mission × latency):
+- high + low → strong cloud (large / reasoning)
+- high + high → balanced medium cloud
+- low + low → cheapest small edge
+- low + high → small edge
+
+Intent nudge: simple_factual → small edge · analysis → large · reasoning → reasoning-tier · coding → large/reasoning if non-trivial.
+
+Cheapest adequate route. Never edge for non-small. Conflict priority: mission > latency > cost.
+Confidence: 0.9+ certain · 0.7-0.9 mostly · <0.7 uncertain.
+
+Self-consistency check before emitting JSON:
+- Read `model tier=<tier>` of the chosen candidate from the list above. Your reasoning must match that tier. Do not call a `small` model `medium`, or a `medium` model `large`.
+- If your reasoning argues for "cloud" or for a medium/large/reasoning-tier model, `deployment` MUST be "cloud".
+- If your reasoning argues for a small / edge model, `deployment` MUST be "edge".
+
+Keep `reasoning` ≤ 25 words.
+
+Respond with JSON only, no markdown fences:
+{{"model_key": "<model_key>", "deployment": "edge", "confidence": 0.85, "reasoning": "Brief."}}
+"""
+
+
 DECISION_PROMPT = {
     "v1": DECISION_PROMPT_V1,
     "v2": DECISION_PROMPT_V2,
     "v3": DECISION_PROMPT_V3,
     "v4": DECISION_PROMPT_V4,
+    "v5": DECISION_PROMPT_V5,
 }

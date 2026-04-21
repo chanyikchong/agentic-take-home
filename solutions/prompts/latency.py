@@ -173,9 +173,33 @@ Respond with JSON only, no markdown fences:
 """
 
 
+LATENCY_PROMPT_V5 = """
+Score how time-sensitive the query is. Do not answer.
+Input: query + predicted intent.
+
+Score 0.0-1.0 = expected response speed (not difficulty):
+- 0.0-0.2 deep research / design / essays
+- 0.2-0.4 thorough explanation, summary
+- 0.4-0.6 general help; balanced
+- 0.6-0.8 quick lookup, troubleshooting
+- 0.8-1.0 real-time / interactive chat
+
+Rules:
+- Simple ≠ urgent. Important ≠ slow-tolerant. Don't infer urgency without wording cues.
+- Task-internal latency vs response-latency: latency numbers mentioned INSIDE the task description (e.g. "design a system with sub-100ms latency", "optimize for <10ms database queries") refer to the SYSTEM the user is asking about, NOT the user's expected response time. A design question with strict latency requirements is usually low response-latency — the user wants a thorough answer, not a fast one. Do not conflate.
+
+Confidence: 0.9+ certain · 0.7-0.9 mostly · <0.7 uncertain.
+Keep `reasoning` ≤ 25 words.
+
+Respond with JSON only, no markdown fences:
+{"score": 0.70, "confidence": 0.85, "reasoning": "Brief."}
+"""
+
+
 LATENCY_PROMPT = {
     "v1": LATENCY_PROMPT_V1,
     "v2": LATENCY_PROMPT_V2,
     "v3": LATENCY_PROMPT_V3,
     "v4": LATENCY_PROMPT_V4,
+    "v5": LATENCY_PROMPT_V5,
 }

@@ -196,9 +196,37 @@ Respond with JSON only, no markdown fences:
 """
 
 
+# v5 = v4 plus the 25-word reasoning cap applied uniformly across all nodes.
+# Meta's structural content (role list, cheap-set policy) is unchanged — the
+# cap is the only edit.
+META_PROMPT_V5 = """
+Pick the LLM for each routing stage. Do not answer the query. Do not pick the final serving model.
+
+Roles:
+- intent: classify query type (5 categories)
+- mission: score correctness-criticality
+- latency: score time-sensitivity
+- decision: pick the final (model, deployment)
+
+Available routing models:
+{available_models}
+
+Cheapest set that routes reliably:
+- Simple/unambiguous → cheapest for all 4.
+- Ambiguous / technical / deceptively-simple → upgrade intent and decision.
+- mission and latency rarely need a strong model.
+
+Keep `reasoning` ≤ 25 words.
+
+Respond with JSON only, no markdown fences:
+{{"intent_model": "<key>", "mission_model": "<key>", "latency_model": "<key>", "decision_model": "<key>", "reasoning": "Brief."}}
+"""
+
+
 META_PROMPT = {
     "v1": META_PROMPT_V1,
     "v2": META_PROMPT_V2,
     "v3": META_PROMPT_V3,
     "v4": META_PROMPT_V4,
+    "v5": META_PROMPT_V5,
 }

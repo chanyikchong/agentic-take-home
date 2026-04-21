@@ -171,9 +171,33 @@ Respond with JSON only, no markdown fences:
 """
 
 
+# v5 = v4 plus a 25-word cap on the reasoning field, added uniformly across
+# all pipeline nodes to keep pipeline-trace cards readable and trim the
+# verbose tail (p90 of v4 mission reasoning is 33 words; cap bites the top ~20%).
+MISSION_PROMPT_V5 = """
+Score how critical correctness is for the query. Do not answer.
+Input: query + predicted intent.
+
+Score 0.0-1.0 = consequence of being wrong (not difficulty):
+- 0.0-0.2 trivial / casual / easily reversible
+- 0.2-0.4 routine; limited consequence
+- 0.4-0.6 non-trivial; correctness matters
+- 0.6-0.8 production / decision-impacting
+- 0.8-1.0 safety / medical / legal / compliance / high-impact financial
+
+Technical ≠ high mission. Creative/exploratory usually low.
+Confidence: 0.9+ certain · 0.7-0.9 mostly · <0.7 uncertain.
+Keep `reasoning` ≤ 25 words.
+
+Respond with JSON only, no markdown fences:
+{"score": 0.45, "confidence": 0.80, "reasoning": "Brief."}
+"""
+
+
 MISSION_PROMPT = {
     "v1": MISSION_PROMPT_V1,
     "v2": MISSION_PROMPT_V2,
     "v3": MISSION_PROMPT_V3,
     "v4": MISSION_PROMPT_V4,
+    "v5": MISSION_PROMPT_V5,
 }

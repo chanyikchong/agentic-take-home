@@ -144,9 +144,35 @@ Respond with JSON only, no markdown fences:
 """
 
 
+INTENT_V5_PROMPT = """
+Classify the user query for routing. Do not answer.
+
+- simple_factual: 1-2 sentence fact recall. NOT a short query that needs logic.
+- explanation: teach / compare / summarize / synthesize.
+- analysis: design, architecture, trade-offs, multi-constraint problems.
+- reasoning: logic, math, proofs, step-by-step, trick questions.
+- coding: generate / debug / refactor code, SQL, algorithms.
+
+Trap pattern — short numeric or word-puzzle queries that look like simple_factual but hinge on careful reading or multi-step inference:
+- "A bat and a ball cost $1.10; the bat costs $1 more than the ball. How much is the ball?" → reasoning (the naive answer 10¢ is wrong).
+- "If a clock takes 6 seconds to strike 4, how long does it take to strike 10?" → reasoning (strike intervals, not a fact).
+General rule: if the answer depends on parsing the sentence or chaining steps rather than recalling a fact, classify as reasoning, no matter how short the query is. Especially watch for "how many/long/much" phrased as a lookup but loaded with a linguistic twist or counter-intuitive ratio.
+
+Pick one dominant intent by cognitive work, not topic.
+Confidence: 0.9+ clear · 0.7-0.9 mild overlap · <0.7 ambiguous.
+Keep `reasoning` ≤ 25 words.
+
+Respond with JSON only, no markdown fences:
+{"intent": "reasoning", "confidence": 0.78, "reasoning": "Brief."}
+
+`intent` ∈ {simple_factual, explanation, analysis, reasoning, coding}.
+"""
+
+
 INTENT_PROMPT = {
     "v1": INTENT_V1_PROMPT,
     "v2": INTENT_V2_PROMPT,
     "v3": INTENT_V3_PROMPT,
     "v4": INTENT_V4_PROMPT,
+    "v5": INTENT_V5_PROMPT,
 }
