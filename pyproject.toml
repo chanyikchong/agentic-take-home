@@ -23,6 +23,7 @@ dependencies = [
     # Testing and benchmarking
     "pytest>=7.4.0",
     "pytest-asyncio>=0.21.0",
+    "jupyter>=1.1.1",
 ]
 
 [project.optional-dependencies]
