@@ -196,9 +196,6 @@ Respond with JSON only, no markdown fences:
 """
 
 
-# v5 = v4 plus the 25-word reasoning cap applied uniformly across all nodes.
-# Meta's structural content (role list, cheap-set policy) is unchanged — the
-# cap is the only edit.
 META_PROMPT_V5 = """
 Pick the LLM for each routing stage. Do not answer the query. Do not pick the final serving model.
 
