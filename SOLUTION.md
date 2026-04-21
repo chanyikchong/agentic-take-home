@@ -6,7 +6,7 @@ To use the custom router:
 ```python
 from solutions.custom_router import CustomRouter
 
-# FastGraphRouterV5 — best-performing configuration in our experiments
+# FastGraphRouterV5
 router = CustomRouter(
     confidence_threshold=0.9,
     use_meta_routing=False,
@@ -33,11 +33,11 @@ We design a custom router to select the most appropriate LLM for answering a use
 This workflow contains 5 nodes, which are meta router node, intent classification node, mission criticality scoring node, latency criticality scoring node, and decision making node. The roles for each node are as follows:
 * **Meta Router**: Select the LLM to generate the answer in the following node.
 * **Intent**: The intent classification node that classifies the intent of the user query. We design 5 intentions, as follows:
-  1. Simple factual
-  2. Explanation
-  3. Analysis
-  4. Reasoning
-  5. Coding
+  1. Simple factual: direct fact recall of known information.
+  2. Explanation: teaching, comparing, summarizing, or synthesizing information.
+  3. Analysis: expert-level design, architecture, trade-off evaluation, or multi-constraint problem-solving.
+  4. Reasoning: logic puzzles, math problems, step-by-step deduction, or trick questions.
+  5. Coding: code generation, debugging, refactoring, algorithm design.
 * **Mission Criticality**: providing a score from the mission criticality aspect of the user query.
 * **Latency Criticality**: providing a score from the latency criticality aspect of the user query.
 * **Decision**: making final LLM selections and deployment decision.
